@@ -1,0 +1,53 @@
+# Course environment: Postgres 17 (two databases) + Redis 7.
+#
+# First `docker compose up` initialises and SEEDS the gym database with
+# ~6.5M rows. That takes a few minutes on first boot only. Watch progress
+# with `make logs`; `make status` shows health.
+#
+#   gym       — pre-seeded practice database for Phase 1 drills
+#   capstone  — empty; you design and build this one yourself
+#
+# Port clash with a local Postgres? Copy .env.example to .env and change
+# POSTGRES_PORT. Full wipe + reseed: `make reset`.
+
+name: tk-backend-course
+
+services:
+  postgres:
+    image: postgres:17
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - track_io_timing=on
+    environment:
+      POSTGRES_USER: student
+      POSTGRES_PASSWORD: student
+      POSTGRES_DB: gym
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    shm_size: 256mb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      # -h 127.0.0.1 forces TCP: stays unhealthy while the init/seed scripts
+      # run (the temporary init server only listens on a unix socket).
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U student -d gym"]
+      interval: 5s
+      timeout: 3s
+      retries: 120
+      start_period: 10s
+
+  redis:
+    # Unused until Phase 4 (caching, Celery). It costs nothing to have it up.
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+
+volumes:
+  pgdata:
+  redisdata:
