@@ -1,0 +1,22 @@
+# local config
+.env
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# node (RN client, much later)
+node_modules/
+
+# editors / os
+.DS_Store
+.idea/
+.vscode/
+
+# scratch space — anything here is throwaway by convention
+scratch/
