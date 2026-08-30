@@ -18,6 +18,8 @@ Concepts that wobbled, scheduled to come back until they don't.
 
 | Concept | Context (what went wrong) | Added | Stage | Next review |
 |---|---|---|---|---|
+| Foreign keys do not create indexes (Postgres) | Predicted `Index Scan` for `WHERE user_id = 4242` because `user_id` is a FK; got `Parallel Seq Scan` over 5M rows. Likely carried over from MySQL/InnoDB, which does auto-index FK columns. | 2026-08-30 | 1 | 2026-09-01 |
+| Reading a plan: fast ≠ efficient | Took 84ms as "the query is fine". The plan showed 1.67M `Rows Removed by Filter` per worker × 3 — the whole table read to return 113 rows. Wall-clock hid the work done. | 2026-08-30 | 1 | 2026-09-01 |
 
 ## Retired
 
