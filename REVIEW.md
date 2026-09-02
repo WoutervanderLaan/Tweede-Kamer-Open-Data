@@ -18,8 +18,9 @@ Concepts that wobbled, scheduled to come back until they don't.
 
 | Concept | Context (what went wrong) | Added | Stage | Next review |
 |---|---|---|---|---|
-| Foreign keys do not create indexes (Postgres) | Predicted `Index Scan` for `WHERE user_id = 4242` because `user_id` is a FK; got `Parallel Seq Scan` over 5M rows. Likely carried over from MySQL/InnoDB, which does auto-index FK columns. | 2026-08-30 | 1 | 2026-09-01 |
-| Reading a plan: fast ≠ efficient | Took 84ms as "the query is fine". The plan showed 1.67M `Rows Removed by Filter` per worker × 3 — the whole table read to return 113 rows. Wall-clock hid the work done. | 2026-08-30 | 1 | 2026-09-01 |
+| Foreign keys do not create indexes (Postgres) | Predicted `Index Scan` for `WHERE user_id = 4242` because `user_id` is a FK; got `Parallel Seq Scan` over 5M rows. Likely carried over from MySQL/InnoDB, which does auto-index FK columns. **2026-09-01: passed unaided** on `tracks.album_id`. | 2026-08-30 | 2 | 2026-09-08 |
+| Reading a plan: per-loop numbers × `loops` | Took 84ms as "the query is fine"; the plan had read all 5M rows. **Missed again 2026-09-01:** given `rows=1200 loops=3` / `Rows Removed by Filter: 98800`, answered 100,000 instead of (1200+98800)×3 = 300,000. `rows` and `Rows Removed` are per-loop averages; multiply by `loops`. | 2026-08-30 | 1 (reset) | 2026-09-04 |
+| Where "logged in" lives | Answered the state table with "Client (Cookie), survives server restart: Yes". A cookie usually holds only an identifier; the record giving it meaning lives server-side, and survival depends on whether that's process memory (no), Redis/DB (yes), or a signed token with no server half at all. Also: session cookie vs `Max-Age`. | 2026-09-01 | 1 | 2026-09-04 |
 
 ## Retired
 

@@ -6,7 +6,8 @@
 ## Position
 
 - **Phase:** 0 — Orientation
-- **Module:** 0.1 — A server is a process (**not started**; smoke test done)
+- **Module:** 0.1 — A server is a process (**worked through A–D**; module
+  gate not yet formally administered — it folds into the Phase 0 gate)
 - **Next gate:** Phase 0 — trace a request end to end, naming every layer
 
 ## Cadence
@@ -19,27 +20,39 @@
 
 ## Last session
 
-- 2026-08-30 (30 min) — first real session. Environment up, gym seeded and
-  answering queries. Exercise 00 (smoke test) done, predictions and results
-  written to `phases/phase-0-orientation/notes/NOTES.md`. Met `EXPLAIN
-  ANALYZE` for the first time; found out the hard way that a foreign key does
-  not create an index in Postgres.
+- 2026-09-01 (~2 h, ran past midnight) — Module 0.1 worked end to end.
+  Ran `python3 -m http.server`, dissected `curl -v`, found the process with
+  `lsof`, killed it, served a request by hand with `nc`, filled in the
+  where-state-lives table. Review: FK/index item passed, plan-reading item
+  missed again. Two accidental findings from the student's own output —
+  `.env` and `.git/` being served over HTTP, and cookies from other localhost
+  apps arriving at a bare `nc` listener (cookies scope by host, not port).
 
 ## Next session — first thing to do
 
-1. `phases/phase-0-orientation/exercises/01-a-server-is-a-process.md` — start
-   Module 0.1. Nothing to re-run first; the environment is up (`make up`).
-2. Expect the two due `REVIEW.md` items to be quizzed before new material.
+1. `phases/phase-0-orientation/exercises/02-trace-a-request.md` — Module 0.2,
+   the life of one request. This one also verifies the Tweede Kamer OData
+   base URL from the student's machine (`capstone/README.md` was written from
+   documentation, never live-tested — if the URL moved, fix it there).
+2. Expect the due `REVIEW.md` items quizzed first — the plan-reading one is
+   at stage 1 for the second time and gets asked properly.
 
 ## Needs revisiting
 
-- **2026-08-30 — foreign keys and indexes.** Believed a FK column is
-  automatically indexed in Postgres. It is not (MySQL/InnoDB does; that's the
-  likely source). Cleared by predicting `Seq Scan` vs `Index Scan` correctly,
-  unaided, on a query the tutor picks. → `REVIEW.md`.
-- **2026-08-30 — "fast" vs "efficient".** Read 84ms as evidence the query was
-  fine; it had just scanned 5M rows across 3 workers. Cleared by reasoning
-  about work done, not wall-clock, on a plan they haven't seen before.
+- ~~**2026-08-30 — foreign keys and indexes.**~~ **Cleared 2026-09-01:**
+  predicted `Seq Scan` on `tracks.album_id` unaided and named the cause —
+  no index exists, `REFERENCES` creates a constraint. Still cycling in
+  `REVIEW.md` at stage 2.
+- **2026-08-30 — "fast" vs "efficient" / reading a plan.** *Missed again
+  2026-09-01.* Given `rows=1200 loops=3, Rows Removed by Filter: 98800`,
+  answered 100,000 rows examined. The per-loop figures must be multiplied by
+  `loops`: (1200 + 98800) × 3 = 300,000. Same arithmetic as the 1.67M × 3 = 5M
+  from the smoke test. Cleared by getting the multiplication right cold.
+- **2026-09-01 — where state lives, rows 3 and 4.** Cart initially placed in a
+  cookie (4KB cap; sent on every request). Page HTML now answered only as the
+  rendered DOM — the fuller truth is that it exists in two places at once,
+  source on the server, rendered copy in the browser. Cleared by reproducing
+  the four-row table cold at the Phase 0 gate.
 - **Not a gap, a signpost:** the student flagged `playlists` /
   `playlist_tracks` as unintuitive. That's a junction table for a
   many-to-many relationship — untaught material, due properly in Phase 1
@@ -63,3 +76,4 @@ is the cold-start hook for the following session.)*
 |---|---|---|---|
 | 2026-08-27 | — | Course scaffolded by tutor. Decisions: capstone = Tweede Kamer vote tracker (official OData API); Postgres via Docker; anchor = weekday evening (day TBD); 4–6 h available this week. | Run `00-smoke-test.md` |
 | 2026-08-30 | 0.5 | Exercise 00 done. `make up` clean, gym seeded (5M `plays`). Predictions: row count right (5M), both timings wrong. `EXPLAIN ANALYZE` introduced; predicted `Index Scan`, got `Parallel Seq Scan`, 1.67M rows discarded per worker. Corrected: FKs don't create indexes in Postgres. Baseline receipt for Module 1.7: **84ms** for `count(*) FROM plays WHERE user_id = 4242`. Anchor weekday: Wed or Fri, unguaranteed. | Start `01-a-server-is-a-process.md` |
+| 2026-09-01 | ~2 | Module 0.1 A–D. HTTP server started, `curl -v` dissected line by line, `lsof -i :8000`, process killed, one response typed by hand into `nc`, state table filled and corrected. Taught: HTTP/1.0 vs 1.1 connection reuse, the connection 4-tuple and ephemeral ports, what dies with a process (binding, sockets, heap — not disk), status codes are for machines, session state as client identifier + server record. Two live findings from his own machine: `.env`/`.git/` served over HTTP, and cookies crossing ports on localhost. Review: FK/index passed → stage 2; plan-reading `loops` arithmetic missed → stage 1 again. | Start `02-trace-a-request.md` |
