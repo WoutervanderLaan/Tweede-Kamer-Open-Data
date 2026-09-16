@@ -35,3 +35,25 @@ From memory. Go
 | TCP                               | provides _reliable transport_                                              | No               |
 | Mobile Network                    | _transports_ packets of the response                                       | No               |
 | RN App                            | app _receives_ plaintext HTTP response                                     | No               |
+
+| Step                        | Adds or decides what?                                                          | Do I own it?     |
+| --------------------------- | ------------------------------------------------------------------------------ | ---------------- |
+| Client app                  | Initiates the request                                                          | No               |
+| Mobile cellular network     | transport the request                                                          | No               |
+| DNS resolution              | resolves the hostname                                                          | Only the records |
+| TCP                         | provides reliable transport                                                    | No               |
+| Kernel socket               | accepts incoming requests                                                      | Yes              |
+| Reverse proxy/TLS           | terminates/routes requests; might serve cached data; provides encryption (TLS) | Yes              |
+| HTTP/server stack/framework | parses and dispatches request to appropriate handler                           | Yes              |
+| app/business logic          | interprets and processes request                                               | Yes              |
+| connection pool             | lends connection to db                                                         | Yes              |
+| Postgres planner/executor   | Plans and executes queries                                                     | Yes              |
+| Disk Storage                | Reads actual rows from disk/storage/cache                                      | Yes              |
+| connection pool             | return connection to pool                                                      | Yes              |
+| app/business logic          | Process returned query result; serialization; adds headers for caching         | Yes              |
+| HTTP/server stack/framework | serializes response into HTTP bytes; compression may occur                     | Yes              |
+| Reverse proxy/TLS           | writes to cache is needed/re-encrypts                                          | Yes              |
+| Kernel socket               | terminates open connection                                                     | Yes              |
+| TCP                         | provides reliable transport                                                    | No               |
+| Mobile cellular network     | transport the response                                                         | No               |
+| Client app                  | receives the returned response                                                 | No               |

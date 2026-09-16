@@ -5,13 +5,12 @@
 
 ## Position
 
-- **Phase:** 0 — Orientation
-- **Module:** 0.2 — The life of one request (**A–C done**; diagram artifact
-  complete after four revisions)
-- **Next gate:** Phase 0 — **attempted 2026-09-08, NOT PASSED.** All four
-  repair items cleared in discussion 2026-09-09. **Retake is the first thing
-  next session**, and the student chose to defer it rather than retake in the
-  same conversation — the right call, and it makes the result mean something.
+- **Phase:** 1 — SQL and data modelling (**opened 2026-09-16**)
+- **Module:** 1.1 — Reading a table honestly (not started; no exercise
+  written yet)
+- **Next gate:** Module 1.1 — predict row count and NULL behaviour of six
+  tutor-written queries before running; ≥5 correct, misses explained back.
+- **Phase 0 gate:** failed 2026-09-08, **PASSED on cold retake 2026-09-16.**
 
 ## Cadence
 
@@ -21,39 +20,46 @@
   weeks pass with neither, revisit whether the anchor idea is working at all.
 - Week of 2026-08-25: 4–6 h available.
 
-## Gate 0 — retake checklist
+## Gate 0 — result (retake, 2026-09-16)
 
-Recite section C cold again. Four layers were wrong; everything else passed
-and does not need re-proving. **All four repaired 2026-09-09 — but one at a
-time, with the tutor naming the layer.** That is a weaker signal than the
-gate itself: the artifact was already correct before the failed attempt, and
-what collapsed was holding the whole stack at once. Assume nothing; run the
-retake cold.
+**PASSED.** Section C recited cold as a table: every layer present, in order,
+correct ownership, nothing invented. All four layers that failed on
+2026-09-08 (pool, planner/executor, app server parsing, kernel socket before
+proxy) were correct without prompting. Three follow-ups administered for the
+first time:
 
-- [x] **Connection pool** — sits between app logic and Postgres, lends
-      already-open connections. At the gate it was placed before the HTTP
-      server and described as "distributes load" (that's a load balancer).
-      **Repaired 2026-09-09** in discussion — strong answer, named the
-      mechanism and the pool-exhaustion tradeoff unprompted.
-- [x] **Planner and executor** (repaired 2026-09-09) — at the gate replaced with an
-      invented "PostgreSQL task queue" and a mislabelled "storage/cache task
-      execution". Planner decides *how* to get rows; executor carries it out;
-      storage serves pages beneath both.
-- [x] **HTTP/app server parses and routes** (repaired 2026-09-09) — at the gate given the
-      proxy's job ("decrypts request"), leaving parsing absent from the stack
-      entirely.
-- [x] **Kernel socket precedes the reverse proxy** (repaired 2026-09-09) — the OS accepts the
-      connection before any userspace process reads from it.
+1. *nginx dies, app still on 127.0.0.1:8000* — outcome right (network error,
+   not a 502), but said the request "stops at the nginx layer". It stops at
+   the **kernel**: nothing bound to 443 → RST → connection refused; TLS and
+   HTTP never happen. → `REVIEW.md`.
+2. *Postgres killed; one previously-requested URL, one fresh* — strongest
+   answer: explicitly refused to assume an earlier request implies a cache.
+   Didn't name *which* layer could hold the cache (proxy cache vs app cache).
+3. *`kill -9` the app mid-query* — nginx → 502; pool dies with the process
+   *if in-process* (noted PgBouncer-style external pools as the exception,
+   unprompted). Correct.
+
+Flaws that didn't fail the gate: return-path kernel socket described as
+"terminates open connection" (wrong — keep-alive; a process decides to
+close, the kernel executes it) → `REVIEW.md`. Planner and executor collapsed
+into one line — fine for Phase 0, will be pulled apart in 1.7.
 
 ## Last session
 
+- 2026-09-16 (~1 h) — **Phase 0 gate passed on cold retake** (details
+  above). Review: "where 'logged in' lives" finally asked — both directions
+  correct (in-memory store dies with the process; session cookie dies with
+  the browser while the Postgres row survives, orphaned but still valid).
+  FK direction passed cold and verified against a live `EXPLAIN ANALYZE`;
+  one slip — suggested `Index Only Scan` for `SELECT *`, impossible when the
+  index lacks the selected columns (untaught 1.7 material, not queued).
 - 2026-09-08/09 — Module 0.2 finished and **Phase 0 gate attempted and
   failed.** The diagram went through four revisions: column 4 was initially
   read as "where can this fail" rather than "where can this be answered from
   cache"; corrected, then TLS ownership corrected (twice), then the return
   path made non-mirror (serialization, cache population, decryption moved off
   the radio onto the device). Artifact ended strong. The gate recitation lost
-  the middle of the stack — see the retake checklist. Caching material, the
+  the middle of the stack (retaken and passed 2026-09-16 — see Gate 0 result). Caching material, the
   hardest-won part, held up cold in both directions. Also updated
   `capstone/README.md` from the live OData service document (39 entity sets;
   base URL verified — the brief's unverified-URL warning is now resolved).
@@ -61,24 +67,18 @@ retake cold.
   plan-reading review item, missed twice before, passed cold on the student's
   own smoke-test output. Weak spot that reappeared: which side of a foreign
   key carries the index.
-- 2026-09-01 (~2 h, ran past midnight) — Module 0.1 worked end to end.
-  Ran `python3 -m http.server`, dissected `curl -v`, found the process with
-  `lsof`, killed it, served a request by hand with `nc`, filled in the
-  where-state-lives table. Review: FK/index item passed, plan-reading item
-  missed again. Two accidental findings from the student's own output —
-  `.env` and `.git/` being served over HTTP, and cookies from other localhost
-  apps arriving at a bare `nc` listener (cookies scope by host, not port).
 
 ## Next session — first thing to do
 
-1. **Quiz "Where 'logged in' lives"** — overdue since 2026-09-04 and deferred
-   twice for gate work. It is the only review item never actually asked.
-2. **Then the Phase 0 gate retake, cold:** section C from memory — every
-   layer, its job, its owner — followed by three "what breaks if this layer
-   dies?" follow-ups, asked one at a time. The follow-ups were skipped on the
-   failed attempt and have never been administered.
-3. Pass → Phase 1 opens (SQL, the gym database). Fail → name the specific
-   layers again and do not open Phase 1.
+1. **Review, max 3, pick the oldest-due first:** the two new stage-1 items
+   (kernel refuses when nothing listens; responses don't close keep-alive
+   connections), then "Postgres connections fork a process" (overdue since
+   2026-09-11, not yet asked).
+2. **Open Module 1.1.** Tutor writes
+   `phases/phase-1-sql/exercises/01-reading-a-table-honestly.md` at session
+   start (not written yet — do it before teaching, keep it 2-hour sized).
+   First thing the student does: `make psql`, `\dt`, `\d users`, and predict
+   a row count before running `count(*)`.
 
 ## Needs revisiting
 
@@ -119,6 +119,7 @@ by an artifact in this repo. Empty is the honest starting state.
 
 | Claim | Evidence | Earned |
 |---|---|---|
+| Can trace an HTTP request end to end (DNS → kernel → TLS-terminating proxy → app → pool → Postgres and back), name each layer's job and owner, and reason about failure when any single layer dies | `phases/phase-0-orientation/notes/request-lifecycle.md`; Phase 0 gate retake 2026-09-16 | 2026-09-16 |
 
 ## Session log
 
@@ -130,3 +131,5 @@ is the cold-start hook for the following session.)*
 | 2026-08-27 | — | Course scaffolded by tutor. Decisions: capstone = Tweede Kamer vote tracker (official OData API); Postgres via Docker; anchor = weekday evening (day TBD); 4–6 h available this week. | Run `00-smoke-test.md` |
 | 2026-08-30 | 0.5 | Exercise 00 done. `make up` clean, gym seeded (5M `plays`). Predictions: row count right (5M), both timings wrong. `EXPLAIN ANALYZE` introduced; predicted `Index Scan`, got `Parallel Seq Scan`, 1.67M rows discarded per worker. Corrected: FKs don't create indexes in Postgres. Baseline receipt for Module 1.7: **84ms** for `count(*) FROM plays WHERE user_id = 4242`. Anchor weekday: Wed or Fri, unguaranteed. | Start `01-a-server-is-a-process.md` |
 | 2026-09-01 | ~2 | Module 0.1 A–D. HTTP server started, `curl -v` dissected line by line, `lsof -i :8000`, process killed, one response typed by hand into `nc`, state table filled and corrected. Taught: HTTP/1.0 vs 1.1 connection reuse, the connection 4-tuple and ephemeral ports, what dies with a process (binding, sockets, heap — not disk), status codes are for machines, session state as client identifier + server record. Two live findings from his own machine: `.env`/`.git/` served over HTTP, and cookies crossing ports on localhost. Review: FK/index passed → stage 2; plan-reading `loops` arithmetic missed → stage 1 again. | Start `02-trace-a-request.md` |
+| 2026-09-08/09 | ~3 | *(Row backfilled 2026-09-16 — omitted at the time.)* Module 0.2 B–C: OData service verified live, `capstone/README.md` updated; request-lifecycle diagram through four revisions. **Phase 0 gate attempted, failed** — pool, planner/executor, app-server parsing, kernel socket. All four repaired in discussion. Review: plan `loops` arithmetic passed → stage 2; FK direction reset. | Quiz "logged in" item, then gate retake cold |
+| 2026-09-16 | ~1 | **Phase 0 gate passed** on cold retake: full stack recited, three "what breaks" follow-ups (nginx dies / Postgres dies / app `kill -9`). Two defects queued: request stops at the *kernel* when nothing listens; return path doesn't close keep-alive connections. Review: "logged in" passed → 2, FK direction passed cold (verified with live `EXPLAIN ANALYZE`) → 2. **Phase 1 open.** | Review 3 items, then tutor writes and starts Module 1.1 exercise 01 |
