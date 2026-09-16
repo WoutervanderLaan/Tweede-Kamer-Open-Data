@@ -6,8 +6,7 @@
 ## Position
 
 - **Phase:** 1 — SQL and data modelling (**opened 2026-09-16**)
-- **Module:** 1.1 — Reading a table honestly (not started; no exercise
-  written yet)
+- **Module:** 1.1 — Reading a table honestly (exercise written, not started)
 - **Next gate:** Module 1.1 — predict row count and NULL behaviour of six
   tutor-written queries before running; ≥5 correct, misses explained back.
 - **Phase 0 gate:** failed 2026-09-08, **PASSED on cold retake 2026-09-16.**
@@ -74,11 +73,9 @@ into one line — fine for Phase 0, will be pulled apart in 1.7.
    (kernel refuses when nothing listens; responses don't close keep-alive
    connections), then "Postgres connections fork a process" (overdue since
    2026-09-11, not yet asked).
-2. **Open Module 1.1.** Tutor writes
-   `phases/phase-1-sql/exercises/01-reading-a-table-honestly.md` at session
-   start (not written yet — do it before teaching, keep it 2-hour sized).
-   First thing the student does: `make psql`, `\dt`, `\d users`, and predict
-   a row count before running `count(*)`.
+2. **Module 1.1:** exercise written 2026-09-16 —
+   `phases/phase-1-sql/exercises/1.1-reading-a-table-honestly.md`. Start at
+   section A, question 1.
 
 ## Needs revisiting
 
