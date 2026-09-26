@@ -5,13 +5,13 @@ has written very little. SQL: basic SELECT + JOIN. Backend concepts: theoretical
 
 **Goal:** genuinely comfortable owning backend work — schema design, real
 queries, building and securing an API, deploying and operating it. The bar is
-*credible backend engineer in a full-stack role*, not backend specialist. Every
+_credible backend engineer in a full-stack role_, not backend specialist. Every
 claim of skill must be backed by something built in this repo.
 
 **The spine:** one capstone — a Tweede Kamer voting tracker built on the
 official parliamentary open-data API (see `capstone/README.md`) — carried
 through every phase. Phase 1 also uses a second, pre-seeded practice database
-("the gym", ~6.5M rows) so that bad queries are *visibly* slow.
+("the gym", ~6.5M rows) so that bad queries are _visibly_ slow.
 
 **Time model:** 4–6 h/week in irregular blocks, zero weeks happen. Durations
 below are honest estimates at that pace, but **gates decide advancement, not
@@ -25,7 +25,11 @@ means staying — with a named list of what's missing.
 Every module in this file lists **Learn** (concepts), **Build** (the artifact
 that proves it), and **Gate** (pass/fail exit check). Exercises are written by
 the tutor into `phases/<phase>/exercises/` during sessions; solutions are
-written by the student, always. Session mechanics — the three files that run
+written by the student, always. Each exercise section opens with a **primer**
+that teaches the Learn material, including a worked example on a parallel
+schema. Questions are labelled 🔮 guess (before teaching, ungraded) or ✅
+check (after teaching). The module's gate rubric is written into the
+exercise file, so passing is defined before it's attempted. Session mechanics — the three files that run
 the course, predict-before-run, the review queue — are in `CLAUDE.md`.
 
 ---
@@ -36,18 +40,20 @@ What a server process actually is, stateless HTTP, where state lives, and the
 full lifecycle of one request. Nothing here is graded on code.
 
 ### 0.1 A server is a process
+
 - **Learn:** a server is an ordinary process listening on a port; sockets,
   localhost vs the network; one process, many clients; what dies when the
   process dies; stateless HTTP; the places state can actually live (database,
   cache, cookie, token, client memory) and what each costs.
 - **Build:** run a throwaway HTTP server on your Mac, talk to it with `curl`
-  and a browser; serve one request *by hand* with `nc` so you've typed an HTTP
+  and a browser; serve one request _by hand_ with `nc` so you've typed an HTTP
   response yourself; written answers in `phases/phase-0-orientation/notes/`.
 - **Gate:** explain, unaided, what exactly stopped existing when you killed
   the server — and where a "logged-in user" would have lived, given that it
   didn't.
 
 ### 0.2 The life of one request
+
 - **Learn:** DNS → TCP → TLS → HTTP request → reverse proxy → application
   process → connection pool → database → response, and what each layer adds;
   request/response anatomy (`curl -v`); status code families; cookies vs
@@ -58,7 +64,7 @@ full lifecycle of one request. Nothing here is graded on code.
   capstone, every layer named, kept in `notes/`.
 - **Gate (= phase gate):** trace a request end to end and name every layer —
   from "the RN app calls `GET /api/motions`" to the row leaving Postgres and
-  back — then answer three "what breaks if *this* layer dies?" follow-ups.
+  back — then answer three "what breaks if _this_ layer dies?" follow-ups.
 
 ---
 
@@ -68,6 +74,7 @@ Raw SQL in `psql` against local Postgres. No ORM, no GUI query builder. Gym
 database for drills; the capstone schema is born in 1.6.
 
 ### 1.1 Reading a table honestly
+
 - **Learn:** SELECT/WHERE/ORDER BY/LIMIT/DISTINCT; expressions and aliases;
   `\d`, `\dt`, `\timing`; NULL and three-valued logic (`= NULL` vs `IS NULL`,
   NULLs in `NOT IN`, in comparisons, in `ORDER BY`); why `DISTINCT` is usually
@@ -75,9 +82,10 @@ database for drills; the capstone schema is born in 1.6.
 - **Build:** first drill set against the gym; a personal `psql` crib sheet in
   `phases/phase-1-sql/notes/`.
 - **Gate:** predict the row count and NULL behaviour of six tutor-written
-  queries *before* running them; at least five correct, misses explained back.
+  queries _before_ running them; at least five correct, misses explained back.
 
 ### 1.2 Joins
+
 - **Learn:** INNER/LEFT/RIGHT/FULL; a join as row multiplication, not lookup;
   join conditions vs filters (`ON` vs `WHERE` on a LEFT JOIN — the classic);
   semi-joins and anti-joins (`EXISTS`, `NOT EXISTS`, `LEFT ... IS NULL`);
@@ -89,6 +97,7 @@ database for drills; the capstone schema is born in 1.6.
   filter moves between `ON` and `WHERE`.
 
 ### 1.3 Aggregation
+
 - **Learn:** GROUP BY as partitioning; aggregate functions; HAVING vs WHERE;
   `count(*)` vs `count(col)` vs `count(DISTINCT col)`; conditional aggregation
   with `FILTER`; division-by-zero and NULL traps in averages (the gym's
@@ -100,6 +109,7 @@ database for drills; the capstone schema is born in 1.6.
   grouping before joining changes the answer.
 
 ### 1.4 Subqueries and CTEs
+
 - **Learn:** scalar/row/table subqueries; correlated vs uncorrelated and what
   correlation costs; `IN` vs `EXISTS` vs `ANY`; CTEs for legibility;
   `LATERAL`; when a CTE is just a subquery with a name and when it changes
@@ -110,15 +120,17 @@ database for drills; the capstone schema is born in 1.6.
   running it, then restructure it to be readable without changing results.
 
 ### 1.5 Window functions
+
 - **Learn:** `OVER`, `PARTITION BY`, frame vs partition; `row_number`/`rank`/
   `dense_rank`; `lag`/`lead`; running totals; top-N-per-group (the interview
   classic); windows vs GROUP BY — when each collapses rows and when not.
 - **Build:** drill set: each user's top track, play-count deltas month over
   month, "first play ever per user" three different ways.
 - **Gate:** top-N-per-group cold, correct on the first run, plus one lag/lead
-  query — and state for each *how many rows* survive before executing.
+  query — and state for each _how many rows_ survive before executing.
 
 ### 1.6 Schema design — the capstone schema is born
+
 - **Learn:** primary keys (natural vs surrogate, when composite); foreign keys
   and what they actually enforce; nullability as a design statement;
   uniqueness constraints as business rules; normalisation 1NF→3NF pragmatically;
@@ -135,6 +147,7 @@ database for drills; the capstone schema is born in 1.6.
   that's not failure, that's the module.
 
 ### 1.7 Indexes and EXPLAIN ANALYZE
+
 - **Learn:** heap + B-tree mental model; what an index costs (writes, space,
   planner options); reading `EXPLAIN (ANALYZE, BUFFERS)`: seq/index/bitmap
   scans, nested loop vs hash vs merge join, rows expected vs actual; why the
@@ -149,6 +162,7 @@ database for drills; the capstone schema is born in 1.6.
   and fix it — or prove the fix isn't an index — without help.
 
 ### 1.8 Transactions and concurrency
+
 - **Learn:** what ACID actually promises; `BEGIN/COMMIT/ROLLBACK`; isolation
   levels (read committed → repeatable read → serializable) and the anomalies
   each allows; the lost update, produced live in two psql terminals; row
@@ -160,6 +174,7 @@ database for drills; the capstone schema is born in 1.6.
   isolation level), and say what each fix costs under load.
 
 ### Phase 1 gate (the big one)
+
 1. Design a schema from scratch for a fresh domain the tutor supplies —
    defended live.
 2. Answer the five `capstone/QUESTIONS.md` questions in raw SQL against real
@@ -173,7 +188,8 @@ database for drills; the capstone schema is born in 1.6.
 ## Phase 2 — Python, then Django's ORM as a leaky abstraction (1–2 months)
 
 ### 2.1 Python for a TypeScript engineer
-- **Learn:** *differences, not basics* — `uv` and virtualenvs (what problem
+
+- **Learn:** _differences, not basics_ — `uv` and virtualenvs (what problem
   they solve that `node_modules` solves differently); project layout and
   packaging (`pyproject.toml`); the type system vs TS (gradual, structural
   `Protocol`s, `mypy`); dataclasses; dict/list/tuple/set idioms and
@@ -185,15 +201,16 @@ database for drills; the capstone schema is born in 1.6.
 - **Build:** **the capstone importer** — a real Python project (`uv`, `ruff`,
   `mypy`, `pytest`) that pulls parties, MPs, seats, motions, decisions and
   votes from the Tweede Kamer OData API with `httpx`, handles pagination,
-  and upserts into *your* Phase 1 schema with `psycopg` (raw SQL — the ORM
+  and upserts into _your_ Phase 1 schema with `psycopg` (raw SQL — the ORM
   hasn't earned its place yet). Re-runnable without duplicating rows.
 - **Gate:** explain your own importer line by line — including every `ON
-  CONFLICT`, every type hint, and what happens when the API hands you a
+CONFLICT`, every type hint, and what happens when the API hands you a
   malformed row — then add a tutor-requested feature live.
 
 ### 2.2 Django's ORM, eyes open
+
 - **Learn:** project/app anatomy and settings; models mapped onto the schema
-  *you* designed (adopting an existing database — `inspectdb`, `managed`,
+  _you_ designed (adopting an existing database — `inspectdb`, `managed`,
   `--fake-initial` — a real-world skill most tutorials skip); queryset
   laziness and exactly when SQL fires; the N+1 disease, diagnosed with
   `connection.queries`, cured with `select_related` (JOIN) vs
@@ -204,10 +221,10 @@ database for drills; the capstone schema is born in 1.6.
   table; `transaction.atomic`; `select_for_update`; `get_or_create` races.
 - **Build:** Django project over the capstone database; the Phase 1 five
   questions re-answered as querysets, each with its predicted SQL written
-  down *before* checking; one hand-written migration executed against your
+  down _before_ checking; one hand-written migration executed against your
   populated capstone data.
 - **Gate (= phase gate):** for any queryset the tutor writes, predict the
-  SQL and the query *count* before running; design the migration plan for
+  SQL and the query _count_ before running; design the migration plan for
   adding a NOT NULL column to a large populated table, including the naive
   plan's failure mode.
 
@@ -216,6 +233,7 @@ database for drills; the capstone schema is born in 1.6.
 ## Phase 3 — API design and auth (1–1.5 months)
 
 ### 3.1 The contract comes first
+
 - **Learn:** resources and verbs; status codes you can defend (200/201/204,
   301/304, 400/401/403/404/405/409/410/422, 429, 500/503); idempotency and
   idempotency keys; pagination — offset vs cursor, and why you already know
@@ -224,11 +242,12 @@ database for drills; the capstone schema is born in 1.6.
   validation at the boundary as a security posture, not a nicety.
 - **Build:** the complete capstone API contract — endpoints, params, status
   codes, error bodies, pagination — as a document in `capstone/api/`,
-  written *before* any implementation.
+  written _before_ any implementation.
 - **Gate:** defend every status code and every design choice in the contract
   under tutor cross-examination; revise what doesn't survive.
 
 ### 3.2 Django REST Framework
+
 - **Learn:** serializers as the validation boundary; ViewSets vs APIViews and
   when the abstraction helps vs hides; routers; permissions classes;
   pagination classes (cursor pagination for real this time); filtering;
@@ -240,6 +259,7 @@ database for drills; the capstone schema is born in 1.6.
   fixed or argued for and the contract amended.
 
 ### 3.3 Auth, honestly
+
 - **Learn:** password storage (argon2, and why "hash" is the wrong mental
   model for MD5-era schemes); sessions vs tokens — actual trade-offs, not
   fashion; JWTs and their failure modes; refresh flows and rotation; OIDC
@@ -248,9 +268,9 @@ database for drills; the capstone schema is born in 1.6.
   same conversation; token storage in React Native (Keychain, not
   AsyncStorage); rate limiting login.
 - **Build:** auth on the capstone API (`django-allauth` not needed — sessions
-  + `simplejwt` tokens by hand first), plus one genuinely per-user feature:
-  followed motions / saved searches, so authorization has something real to
-  protect.
+  - `simplejwt` tokens by hand first), plus one genuinely per-user feature:
+    followed motions / saved searches, so authorization has something real to
+    protect.
 - **Gate (= phase gate):** full written contract for a new feature including
   auth, defended; plus a whiteboard walk of the RN client's token lifecycle —
   storage, refresh, logout, and what leaks if the phone is stolen.
@@ -260,6 +280,7 @@ database for drills; the capstone schema is born in 1.6.
 ## Phase 4 — Running it in production (1–1.5 months)
 
 ### 4.1 Config, logging, errors
+
 - **Learn:** 12-factor config via environment (`django-environ`); settings
   splits without foot-guns; secrets hygiene; structured logging (`structlog`)
   — logs as data, request IDs; error tracking (Sentry); health endpoints.
@@ -269,6 +290,7 @@ database for drills; the capstone schema is born in 1.6.
   alone; find a specific request's story in the logs on demand.
 
 ### 4.2 Docker and the real deploy
+
 - **Learn:** a production Dockerfile (multi-stage, non-root, layer caching);
   gunicorn and workers; static files (whitenoise); Fly.io deploy with managed
   Postgres; TLS and a real domain; running migrations on deploy —
@@ -281,6 +303,7 @@ database for drills; the capstone schema is born in 1.6.
   backup is real.
 
 ### 4.3 Background work — Celery and Redis
+
 - **Learn:** why web requests must not do slow work; Celery + Redis broker;
   at-least-once delivery and what it forces (idempotent tasks); retries and
   backoff; beat schedules; what happens to a task mid-flight when the worker
@@ -292,6 +315,7 @@ database for drills; the capstone schema is born in 1.6.
   demonstrate what happened to the task, the data, and the queue.
 
 ### 4.4 Caching, invalidation, rate limiting
+
 - **Learn:** HTTP caching (ETag/Cache-Control) vs server-side caching and why
   you reach for HTTP first; Redis low-level caching; TTL vs event
   invalidation; the stampede problem; what is safe to cache when votes update
@@ -300,7 +324,7 @@ database for drills; the capstone schema is born in 1.6.
   invalidation triggered by the nightly import; sensible throttles on the API.
 - **Gate (= phase gate):** the capstone is live on a real domain, and for
   each of {gunicorn worker, Celery worker, Postgres, Redis} you answer "what
-  happens when this process dies?" — concretely, for *your* system, including
+  happens when this process dies?" — concretely, for _your_ system, including
   what the user sees and what recovers by itself.
 
 ---
@@ -308,6 +332,7 @@ database for drills; the capstone schema is born in 1.6.
 ## Phase 5 — Testing and depth (ongoing)
 
 ### 5.1 Tests that touch the database
+
 - **Learn:** `pytest` + `pytest-django`; the test database and transactional
   isolation; API tests with the DRF client; factories (`model-bakery`);
   testing constraints, permissions, and contracts — not mocking the database
@@ -320,7 +345,8 @@ database for drills; the capstone schema is born in 1.6.
   (and if it doesn't, the missing test gets written and the lesson logged).
 
 ### 5.2 Systems depth (reading, spaced)
-- *Designing Data-Intensive Applications* ch. 1–3, 5, 7 — each mapped to a
+
+- _Designing Data-Intensive Applications_ ch. 1–3, 5, 7 — each mapped to a
   thing you built; use-the-index-luke.com as the 1.7 companion; the Postgres
   docs' MVCC chapter after 1.8 has made it concrete; one incident post-mortem
   read per month, retold in your own words at session start.
@@ -336,14 +362,14 @@ monolith — is met.
 
 ## Timeline sketch (at 4–6 h/week, zero weeks absorbed)
 
-| Phase | Calendar guess |
-|---|---|
-| 0 — Orientation | weeks 1–2 |
-| 1 — SQL & modelling | weeks 3–14 |
-| 2 — Python & Django ORM | weeks 15–22 |
-| 3 — API & auth | weeks 23–28 |
-| 4 — Production | weeks 29–34 |
-| 5 — Testing & depth | ongoing from week 30-ish |
+| Phase                   | Calendar guess           |
+| ----------------------- | ------------------------ |
+| 0 — Orientation         | weeks 1–2                |
+| 1 — SQL & modelling     | weeks 3–14               |
+| 2 — Python & Django ORM | weeks 15–22              |
+| 3 — API & auth          | weeks 23–28              |
+| 4 — Production          | weeks 29–34              |
+| 5 — Testing & depth     | ongoing from week 30-ish |
 
 Roughly: live capstone by next spring. The table is a compass, not a contract
 — gates are the contract.
@@ -356,23 +382,23 @@ Industry-standard choices, cross-checked against the reference project
 [Amsterdam/aapp_api_services](https://github.com/Amsterdam/aapp_api_services)
 (a production Django/DRF service for the Amsterdam city app):
 
-| Purpose | This course | Reference repo | Note |
-|---|---|---|---|
-| Packaging | `uv` | `uv` | |
-| Lint/format | `ruff` | `ruff` | |
-| Types | `mypy` + `django-stubs` | — | added: typing is your strength, use it |
-| Tests | `pytest` + `pytest-django` | same | |
-| Factories | `model-bakery` | `model-bakery` | |
-| Postgres driver | `psycopg` (v3) | `psycopg2` | v3 is current; you'll meet v2 in older code |
-| HTTP client | `httpx` | — | `requests` is what you'll see at work |
-| Framework | Django + DRF | Django + DRF | |
-| OpenAPI | `drf-spectacular` | same | |
-| JWT | `djangorestframework-simplejwt` | same | |
-| Cache | `django-redis` | same | |
-| Jobs | Celery + Redis | — (Azure equivalents) | curriculum requirement |
-| Logging | `structlog` | Azure OpenTelemetry | same role, platform-neutral |
-| Errors | Sentry | Azure App Insights | same role |
-| Serving | gunicorn + whitenoise | gunicorn | |
-| Config | `django-environ` | — | |
-| Hooks | `pre-commit` | same | |
-| Runtime | Python 3.13+, Postgres 17, Redis 7 | Python 3.14 | |
+| Purpose         | This course                        | Reference repo        | Note                                        |
+| --------------- | ---------------------------------- | --------------------- | ------------------------------------------- |
+| Packaging       | `uv`                               | `uv`                  |                                             |
+| Lint/format     | `ruff`                             | `ruff`                |                                             |
+| Types           | `mypy` + `django-stubs`            | —                     | added: typing is your strength, use it      |
+| Tests           | `pytest` + `pytest-django`         | same                  |                                             |
+| Factories       | `model-bakery`                     | `model-bakery`        |                                             |
+| Postgres driver | `psycopg` (v3)                     | `psycopg2`            | v3 is current; you'll meet v2 in older code |
+| HTTP client     | `httpx`                            | —                     | `requests` is what you'll see at work       |
+| Framework       | Django + DRF                       | Django + DRF          |                                             |
+| OpenAPI         | `drf-spectacular`                  | same                  |                                             |
+| JWT             | `djangorestframework-simplejwt`    | same                  |                                             |
+| Cache           | `django-redis`                     | same                  |                                             |
+| Jobs            | Celery + Redis                     | — (Azure equivalents) | curriculum requirement                      |
+| Logging         | `structlog`                        | Azure OpenTelemetry   | same role, platform-neutral                 |
+| Errors          | Sentry                             | Azure App Insights    | same role                                   |
+| Serving         | gunicorn + whitenoise              | gunicorn              |                                             |
+| Config          | `django-environ`                   | —                     |                                             |
+| Hooks           | `pre-commit`                       | same                  |                                             |
+| Runtime         | Python 3.13+, Postgres 17, Redis 7 | Python 3.14           |                                             |

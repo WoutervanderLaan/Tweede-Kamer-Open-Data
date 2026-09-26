@@ -13,6 +13,15 @@ Concepts that wobbled, scheduled to come back until they don't.
 - Missed → back to stage 1, and re-teach briefly before new material.
 - Keep rows short. The context column exists so a cold future session knows
   _why_ this item is here.
+- **What gets in:** only concepts that were actually taught (✅ material —
+  never a 🔮 guess), and only ones that serve the course goal (SQL, Django,
+  APIs, auth, running it in production). A wobble on a detail off that path
+  gets a one-time re-explanation in the session, not a queue row.
+- **Grading:** judge the substance, not the phrasing. An answer that is
+  correct but from a different angle is a pass.
+- **Stage `final`:** for items worth fixing once but not worth cycling.
+  Asked one more time; a pass retires it, and a miss gets a short
+  re-explanation and then retires it anyway.
 
 ## Active queue
 
@@ -24,8 +33,8 @@ Concepts that wobbled, scheduled to come back until they don't.
 | Planner vs. executor vs. storage | At the Phase 0 gate (2026-09-08) replaced Postgres' internals with an invented "task queue" and a mislabelled "storage/cache task execution". Planner chooses the access path, executor runs it, storage serves pages from `shared_buffers`/disk. Directly blocks Phase 1, which is largely reading planner output. **Repaired 2026-09-09** — split cost/actual on the smoke-test plan correctly and unaided. **2026-09-16 gate:** present but collapsed into one row ("plans and executes") — not quizzed separately; ask it next as a split. | 2026-09-09 | 2 | 2026-09-16 |
 | What the HTTP/app server does | At the gate, given the proxy's job ("decrypts request"); parsing raw bytes into a routed request went missing from the stack entirely. Decryption happens once, at the proxy. **2026-09-16: correct cold at gate retake** ("parses and dispatches request to appropriate handler"). | 2026-09-09 | 2 | 2026-09-23 |
 | Postgres connections fork a process | Explained the pool well (2026-09-09) but located the cost in TCP/TLS setup. The dominant cost is the postmaster forking a backend process with its own memory — the reason `max_connections` is ~100, not 10,000. Also: reused connections carry state (open transactions, `SET`, temp tables), which is a bug source, not only a speedup. | 2026-09-09 | 1 | 2026-09-11 |
-| Nothing listening → the kernel refuses | Gate follow-up (2026-09-16): nginx dead, said the request "stops at the nginx layer". A dead process is not a layer. The SYN reaches the kernel, no socket is bound to 443, the kernel replies RST → client sees *connection refused*; TLS and HTTP never start. Contrast: proxy alive but app dead → 502, because an HTTP-speaking process exists to say so. Ask: "which process sends the RST?" | 2026-09-16 | 1 | 2026-09-18 |
-| A response does not close the connection | Gate recitation (2026-09-16): return-path kernel socket "terminates open connection". HTTP/1.1 keep-alive (taught in 0.1) reuses the connection for the next request; on the way out the kernel buffers bytes for TCP. Closing is a *process's* decision (nginx idle timeout, `Connection: close`), executed by the kernel. | 2026-09-16 | 1 | 2026-09-18 |
+| Nothing listening → the kernel refuses | Gate follow-up (2026-09-16): nginx dead, said the request "stops at the nginx layer". A dead process is not a layer. The SYN reaches the kernel, no socket is bound to 443, the kernel replies RST → client sees *connection refused*; TLS and HTTP never start. Contrast: proxy alive but app dead → 502, because an HTTP-speaking process exists to say so. Ask: "which process sends the RST?" Off the course's main path → final pass (2026-09-26). | 2026-09-16 | final | 2026-09-18 |
+| A response does not close the connection | Gate recitation (2026-09-16): return-path kernel socket "terminates open connection". HTTP/1.1 keep-alive (taught in 0.1) reuses the connection for the next request; on the way out the kernel buffers bytes for TCP. Closing is a *process's* decision (nginx idle timeout, `Connection: close`), executed by the kernel. Off the course's main path → final pass (2026-09-26). | 2026-09-16 | final | 2026-09-18 |
 
 ## Retired
 

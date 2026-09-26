@@ -26,9 +26,24 @@ Argument: `start` (default) | `end` | `status`
 4. Ask one question: how much time is on the clock right now (30m / 1h / 2h).
    Cut today's plan to fit — a finished small block beats an abandoned big one.
 5. Quiz the due `REVIEW.md` items — at most 3, one at a time, prediction-style.
-   Advance or reset their stages in the file.
+   Say in one line what the item is about before asking ("one on reading
+   plans"). Grade the substance, not the phrasing. Advance or reset their
+   stages in the file. Items at stage `final` retire after this ask either
+   way.
 6. Run the module per `CURRICULUM.md`:
-   - New exercises go in `phases/<phase>/exercises/`, numbered.
+   - **Teach first.** At the start of each section, go through its primer:
+     ask whether it was read, explain it live (briefly, with the parallel
+     example) if not, and take questions. Only then ask the first question.
+   - Label every question 🔮 guess or ✅ check. After a 🔮 reveal, explain
+     right away. Never treat a guess as a miss.
+   - Before a run of questions, give the signpost: where it's heading, and
+     what shape of answer is wanted.
+   - Answer the student's own questions when asked: short and true now,
+     depth later. Withhold only what would solve a current exercise, and say
+     that's why.
+   - New exercises go in `phases/<phase>/exercises/`, numbered, following
+     the 1.1 template: a primer per section, labelled questions, and a
+     written gate rubric.
    - Predict-before-run on everything executable.
    - One question per turn. No solution-writing, per `CLAUDE.md`.
 7. Watch the clock: leave ~10 minutes for the end ritual. If mid-exercise

@@ -6,7 +6,9 @@
 ## Position
 
 - **Phase:** 1 — SQL and data modelling (**opened 2026-09-16**)
-- **Module:** 1.1 — Reading a table honestly (exercise written, not started)
+- **Module:** 1.1 — Reading a table honestly (started solo: Q1 and a
+  `COMMENT ON` for Q3 in the queries file; exercise revised 2026-09-26 with
+  primers and question labels — numbering unchanged)
 - **Next gate:** Module 1.1 — predict row count and NULL behaviour of six
   tutor-written queries before running; ≥5 correct, misses explained back.
 - **Phase 0 gate:** failed 2026-09-08, **PASSED on cold retake 2026-09-16.**
@@ -73,9 +75,11 @@ into one line — fine for Phase 0, will be pulled apart in 1.7.
    (kernel refuses when nothing listens; responses don't close keep-alive
    connections), then "Postgres connections fork a process" (overdue since
    2026-09-11, not yet asked).
-2. **Module 1.1:** exercise written 2026-09-16 —
-   `phases/phase-1-sql/exercises/1.1-reading-a-table-honestly.md`. Start at
-   section A, question 1.
+2. **Answer the junction-table question** (see Needs revisiting) — two
+   minutes, before new material.
+3. **Module 1.1:** `phases/phase-1-sql/exercises/1.1-reading-a-table-honestly.md`
+   (revised 2026-09-26). Go through **Primer A** first, then A.2 — Q1 and
+   part of Q3 are already in the queries file.
 
 ## Needs revisiting
 
@@ -103,11 +107,15 @@ into one line — fine for Phase 0, will be pulled apart in 1.7.
   Module 1.6 material and was withdrawn. Use this as the motivating example
   when temporal modelling arrives. Related: *gaps and islands*, due with
   window functions in Phase 1.
-- **Not a gap, a signpost:** the student flagged `playlists` /
-  `playlist_tracks` as unintuitive. That's a junction table for a
-  many-to-many relationship — untaught material, due properly in Phase 1
-  (1.2 joins, 1.6 schema design). Do not answer it early; use it as the
-  motivating example when 1.2 arrives.
+- **Open question from the student:** `playlists` / `playlist_tracks` felt
+  unintuitive. **Answer it briefly at the next session** (per the
+  2026-09-26 rule: answer questions when asked): `playlist_tracks` is a
+  *junction table*. One playlist has many tracks, one track sits on many
+  playlists, and a many-to-many relationship can't live in either table, so
+  each row of the junction records one (playlist, track) pairing. The
+  composite primary key stops the same track appearing twice on one
+  playlist. Depth comes in 1.2 (joining through it) and 1.6 (designing
+  one).
 
 ## Claim ledger
 
@@ -130,3 +138,4 @@ is the cold-start hook for the following session.)*
 | 2026-09-01 | ~2 | Module 0.1 A–D. HTTP server started, `curl -v` dissected line by line, `lsof -i :8000`, process killed, one response typed by hand into `nc`, state table filled and corrected. Taught: HTTP/1.0 vs 1.1 connection reuse, the connection 4-tuple and ephemeral ports, what dies with a process (binding, sockets, heap — not disk), status codes are for machines, session state as client identifier + server record. Two live findings from his own machine: `.env`/`.git/` served over HTTP, and cookies crossing ports on localhost. Review: FK/index passed → stage 2; plan-reading `loops` arithmetic missed → stage 1 again. | Start `02-trace-a-request.md` |
 | 2026-09-08/09 | ~3 | *(Row backfilled 2026-09-16 — omitted at the time.)* Module 0.2 B–C: OData service verified live, `capstone/README.md` updated; request-lifecycle diagram through four revisions. **Phase 0 gate attempted, failed** — pool, planner/executor, app-server parsing, kernel socket. All four repaired in discussion. Review: plan `loops` arithmetic passed → stage 2; FK direction reset. | Quiz "logged in" item, then gate retake cold |
 | 2026-09-16 | ~1 | **Phase 0 gate passed** on cold retake: full stack recited, three "what breaks" follow-ups (nginx dies / Postgres dies / app `kill -9`). Two defects queued: request stops at the *kernel* when nothing listens; return path doesn't close keep-alive connections. Review: "logged in" passed → 2, FK direction passed cold (verified with live `EXPLAIN ANALYZE`) → 2. **Phase 1 open.** | Review 3 items, then tutor writes and starts Module 1.1 exercise 01 |
+| 2026-09-26 | — | *Course revision, no study.* Student reported too little theory before questions. Changes: every exercise section now opens with a primer (1.1 rewritten as the template); questions labelled 🔮 guess / ✅ check; signposts before question runs; student questions answered when asked; grading on substance, with gate rubric written up front; review queue limited to taught, on-path concepts (two networking items → `final`). Rules in `CLAUDE.md` 3–8. | Answer junction-table question; Primer A, then 1.1 Q2 |
